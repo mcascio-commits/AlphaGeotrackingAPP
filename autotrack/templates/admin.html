@@ -1,0 +1,305 @@
+{% extends 'base.html' %}
+{% block title %}Administration — AutoTrack{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>⚙️ Administration</h1>
+  <p>Gérez les paramètres de l'application</p>
+</div>
+
+<!-- TABS -->
+<div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;" id="tabs">
+  <button class="tab-btn active" onclick="showTab('partenaires')">🤝 Partenaires</button>
+  <button class="tab-btn" onclick="showTab('clients')">👤 Types client</button>
+  <button class="tab-btn" onclick="showTab('vehicules')">🚗 Types véhicule</button>
+  <button class="tab-btn" onclick="showTab('interventions')">🔧 Interventions</button>
+  <button class="tab-btn" onclick="showTab('users')">👥 Utilisateurs</button>
+</div>
+
+<!-- ── PARTENAIRES ── -->
+<div class="tab-panel" id="tab-partenaires">
+  <div class="card">
+    <div class="card-header">🤝 Partenaires</div>
+    <form method="POST" action="{{ url_for('admin_partenaire') }}" style="display:flex;gap:0.75rem;margin-bottom:1.5rem;">
+      <input type="hidden" name="action" value="add">
+      <input type="text" name="nom" placeholder="Nom du partenaire" required style="max-width:300px;">
+      <button type="submit" class="btn btn-primary">+ Ajouter</button>
+    </form>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Nom</th><th>Statut</th><th>Actions</th></tr></thead>
+        <tbody>
+          {% for p in partenaires %}
+          <tr>
+            <td style="color:var(--text2);">{{ p.id }}</td>
+            <td id="pnom{{ p.id }}"><strong>{{ p.nom }}</strong></td>
+            <td><span class="badge-pill {{ 'active' if p.actif else 'inactive' }}">{{ 'Actif' if p.actif else 'Inactif' }}</span></td>
+            <td style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+              <button onclick="editInline('p','{{ p.id }}','{{ p.nom }}')" class="btn btn-secondary btn-sm">✏️ Modifier</button>
+              <form method="POST" action="{{ url_for('admin_partenaire') }}" style="display:inline;">
+                <input type="hidden" name="action" value="toggle">
+                <input type="hidden" name="id" value="{{ p.id }}">
+                <button type="submit" class="btn btn-secondary btn-sm">{{ '🔴 Désactiver' if p.actif else '🟢 Activer' }}</button>
+              </form>
+              <form method="POST" action="{{ url_for('admin_partenaire') }}" style="display:inline;"
+                    onsubmit="return confirm('Supprimer {{ p.nom }} ?');">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="id" value="{{ p.id }}">
+                <button type="submit" class="btn btn-danger btn-sm">🗑</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── TYPES CLIENT ── -->
+<div class="tab-panel" id="tab-clients" style="display:none;">
+  <div class="card">
+    <div class="card-header">👤 Types de client</div>
+    <form method="POST" action="{{ url_for('admin_type_client') }}" style="display:flex;gap:0.75rem;margin-bottom:1.5rem;">
+      <input type="hidden" name="action" value="add">
+      <input type="text" name="nom" placeholder="Nom du type client" required style="max-width:300px;">
+      <button type="submit" class="btn btn-primary">+ Ajouter</button>
+    </form>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Nom</th><th>Statut</th><th>Actions</th></tr></thead>
+        <tbody>
+          {% for tc in types_client %}
+          <tr>
+            <td style="color:var(--text2);">{{ tc.id }}</td>
+            <td><strong>{{ tc.nom }}</strong></td>
+            <td><span class="badge-pill {{ 'active' if tc.actif else 'inactive' }}">{{ 'Actif' if tc.actif else 'Inactif' }}</span></td>
+            <td style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+              <form method="POST" action="{{ url_for('admin_type_client') }}" style="display:inline;">
+                <input type="hidden" name="action" value="toggle">
+                <input type="hidden" name="id" value="{{ tc.id }}">
+                <button type="submit" class="btn btn-secondary btn-sm">{{ '🔴 Désactiver' if tc.actif else '🟢 Activer' }}</button>
+              </form>
+              <form method="POST" action="{{ url_for('admin_type_client') }}" style="display:inline;"
+                    onsubmit="return confirm('Supprimer {{ tc.nom }} ?');">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="id" value="{{ tc.id }}">
+                <button type="submit" class="btn btn-danger btn-sm">🗑</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── TYPES VEHICULE ── -->
+<div class="tab-panel" id="tab-vehicules" style="display:none;">
+  <div class="card">
+    <div class="card-header">🚗 Types de véhicule</div>
+    <form method="POST" action="{{ url_for('admin_type_vehicule') }}" style="display:flex;gap:0.75rem;margin-bottom:1.5rem;">
+      <input type="hidden" name="action" value="add">
+      <input type="text" name="nom" placeholder="Ex: Utilitaire" required style="max-width:300px;">
+      <button type="submit" class="btn btn-primary">+ Ajouter</button>
+    </form>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Nom</th><th>Statut</th><th>Actions</th></tr></thead>
+        <tbody>
+          {% for tv in types_vehicule %}
+          <tr>
+            <td style="color:var(--text2);">{{ tv.id }}</td>
+            <td><strong>{{ tv.nom }}</strong></td>
+            <td><span class="badge-pill {{ 'active' if tv.actif else 'inactive' }}">{{ 'Actif' if tv.actif else 'Inactif' }}</span></td>
+            <td style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+              <form method="POST" action="{{ url_for('admin_type_vehicule') }}" style="display:inline;">
+                <input type="hidden" name="action" value="toggle">
+                <input type="hidden" name="id" value="{{ tv.id }}">
+                <button type="submit" class="btn btn-secondary btn-sm">{{ '🔴 Désactiver' if tv.actif else '🟢 Activer' }}</button>
+              </form>
+              <form method="POST" action="{{ url_for('admin_type_vehicule') }}" style="display:inline;"
+                    onsubmit="return confirm('Supprimer {{ tv.nom }} ?');">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="id" value="{{ tv.id }}">
+                <button type="submit" class="btn btn-danger btn-sm">🗑</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── INTERVENTIONS ── -->
+<div class="tab-panel" id="tab-interventions" style="display:none;">
+  <div class="card">
+    <div class="card-header">🔧 Types d'intervention <small style="font-weight:400;color:var(--text2);">(par type de client)</small></div>
+    <form method="POST" action="{{ url_for('admin_type_intervention') }}" style="display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+      <input type="hidden" name="action" value="add">
+      <select name="type_client_id" required style="max-width:200px;">
+        <option value="">— Type client —</option>
+        {% for tc in types_client %}
+        <option value="{{ tc.id }}">{{ tc.nom }}</option>
+        {% endfor %}
+      </select>
+      <input type="text" name="nom" placeholder="Nom de l'intervention" required style="max-width:250px;">
+      <button type="submit" class="btn btn-primary">+ Ajouter</button>
+    </form>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Nom</th><th>Type client</th><th>Statut</th><th>Actions</th></tr></thead>
+        <tbody>
+          {% for i in interventions %}
+          <tr>
+            <td style="color:var(--text2);">{{ i.id }}</td>
+            <td><strong>{{ i.nom }}</strong></td>
+            <td><span class="badge-pill user">{{ i.type_client.nom }}</span></td>
+            <td><span class="badge-pill {{ 'active' if i.actif else 'inactive' }}">{{ 'Actif' if i.actif else 'Inactif' }}</span></td>
+            <td style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+              <form method="POST" action="{{ url_for('admin_type_intervention') }}" style="display:inline;">
+                <input type="hidden" name="action" value="toggle">
+                <input type="hidden" name="id" value="{{ i.id }}">
+                <button type="submit" class="btn btn-secondary btn-sm">{{ '🔴' if i.actif else '🟢' }}</button>
+              </form>
+              <form method="POST" action="{{ url_for('admin_type_intervention') }}" style="display:inline;"
+                    onsubmit="return confirm('Supprimer cette intervention ?');">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="id" value="{{ i.id }}">
+                <button type="submit" class="btn btn-danger btn-sm">🗑</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── UTILISATEURS ── -->
+<div class="tab-panel" id="tab-users" style="display:none;">
+  <div class="card">
+    <div class="card-header">👥 Utilisateurs</div>
+    <details style="margin-bottom:1.5rem;">
+      <summary style="cursor:pointer;color:var(--accent);font-weight:600;padding:0.5rem 0;">+ Créer un nouvel utilisateur</summary>
+      <form method="POST" action="{{ url_for('admin_user') }}" style="margin-top:1rem;display:flex;gap:0.75rem;flex-wrap:wrap;align-items:flex-end;">
+        <input type="hidden" name="action" value="add">
+        <div>
+          <label style="display:block;font-size:0.8rem;color:var(--text2);margin-bottom:0.3rem;">Identifiant</label>
+          <input type="text" name="username" placeholder="login" required style="max-width:200px;">
+        </div>
+        <div>
+          <label style="display:block;font-size:0.8rem;color:var(--text2);margin-bottom:0.3rem;">Mot de passe</label>
+          <input type="password" name="password" placeholder="••••••" required style="max-width:200px;">
+        </div>
+        <div style="display:flex;align-items:center;gap:0.4rem;padding-bottom:0.1rem;">
+          <input type="checkbox" name="is_admin" value="1" id="new_is_admin" style="width:auto;">
+          <label for="new_is_admin" style="font-size:0.9rem;color:var(--text);text-transform:none;">Administrateur</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Créer</button>
+      </form>
+    </details>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Identifiant</th><th>Rôle</th><th>Créé le</th><th>Actions</th></tr></thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td style="color:var(--text2);">{{ u.id }}</td>
+            <td><strong>{{ u.username }}</strong> {% if u.id == current_user.id %}<span style="color:var(--accent);font-size:0.75rem;">(vous)</span>{% endif %}</td>
+            <td><span class="badge-pill {{ 'admin' if u.is_admin else 'user' }}">{{ '👑 Admin' if u.is_admin else 'Utilisateur' }}</span></td>
+            <td style="color:var(--text2);">{{ u.created_at.strftime('%d/%m/%Y') }}</td>
+            <td style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+              {% if u.id != current_user.id %}
+              <form method="POST" action="{{ url_for('admin_user') }}" style="display:inline;">
+                <input type="hidden" name="action" value="toggle_admin">
+                <input type="hidden" name="id" value="{{ u.id }}">
+                <button type="submit" class="btn btn-secondary btn-sm">{{ '⬇️ Retirer admin' if u.is_admin else '⬆️ Rendre admin' }}</button>
+              </form>
+              <button onclick="resetPwd({{ u.id }}, '{{ u.username }}')" class="btn btn-secondary btn-sm">🔑 Reset mdp</button>
+              <form method="POST" action="{{ url_for('admin_user') }}" style="display:inline;"
+                    onsubmit="return confirm('Supprimer {{ u.username }} ?');">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="id" value="{{ u.id }}">
+                <button type="submit" class="btn btn-danger btn-sm">🗑</button>
+              </form>
+              {% else %}
+              <span style="color:var(--text2);font-size:0.8rem;">Compte actuel</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Reset password modal -->
+<div id="pwdModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:2rem;width:90%;max-width:400px;">
+    <h3 style="margin-bottom:1.25rem;font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;">🔑 Nouveau mot de passe</h3>
+    <form method="POST" action="{{ url_for('admin_user') }}">
+      <input type="hidden" name="action" value="reset_password">
+      <input type="hidden" name="id" id="pwdUserId">
+      <div class="form-group">
+        <label id="pwdLabel">Nouveau mot de passe pour</label>
+        <input type="password" name="new_password" placeholder="Nouveau mot de passe" required>
+      </div>
+      <div style="display:flex;gap:0.75rem;">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('pwdModal').style.display='none'">Annuler</button>
+        <button type="submit" class="btn btn-primary">Confirmer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+.tab-btn {
+  background: var(--bg3); border: 1px solid var(--border); color: var(--text2);
+  padding: 0.5rem 1rem; border-radius: var(--radius); cursor: pointer;
+  font-family: 'Barlow', sans-serif; font-size: 0.9rem; font-weight: 600; transition: all 0.2s;
+}
+.tab-btn:hover { border-color: var(--accent); color: var(--text); }
+.tab-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).style.display = 'block';
+  event.target.classList.add('active');
+}
+
+function resetPwd(id, username) {
+  document.getElementById('pwdUserId').value = id;
+  document.getElementById('pwdLabel').textContent = `Nouveau mot de passe pour "${username}"`;
+  document.getElementById('pwdModal').style.display = 'flex';
+}
+
+function editInline(type, id, currentName) {
+  const newName = prompt('Nouveau nom :', currentName);
+  if (!newName || newName === currentName) return;
+  const form = document.createElement('form');
+  form.method = 'POST';
+  const routes = { p: '{{ url_for("admin_partenaire") }}' };
+  form.action = routes[type];
+  const fields = { action: 'edit', id: id, nom: newName };
+  Object.entries(fields).forEach(([k, v]) => {
+    const inp = document.createElement('input');
+    inp.type = 'hidden'; inp.name = k; inp.value = v;
+    form.appendChild(inp);
+  });
+  document.body.appendChild(form);
+  form.submit();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — AutoTrack{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>🏠 Tableau de bord</h1>
+  <p>Vue d'ensemble des interventions enregistrées</p>
+</div>
+
+<div class="grid-4" style="margin-bottom:2rem;">
+  <div class="stat-card">
+    <span class="label">Total fiches</span>
+    <span class="value">{{ total }}</span>
+    <span class="sub">Depuis le début</span>
+  </div>
+  <div class="stat-card">
+    <span class="label">Aujourd'hui</span>
+    <span class="value">{{ today }}</span>
+    <span class="sub">Fiches du jour</span>
+  </div>
+  <div class="stat-card">
+    <span class="label">Utilisateur</span>
+    <span class="value" style="font-size:1.4rem;margin-top:0.4rem;">{{ current_user.username }}</span>
+    <span class="sub">{{ '👑 Administrateur' if current_user.is_admin else 'Utilisateur standard' }}</span>
+  </div>
+  <div class="stat-card" style="justify-content:center;align-items:center;cursor:pointer;" onclick="window.location='{{ url_for('nouvelle_fiche') }}'">
+    <span style="font-size:2rem;">+</span>
+    <span class="label" style="text-align:center;">Nouvelle fiche</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">📋 Dernières fiches enregistrées</div>
+  {% if fiches %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Date / Heure</th>
+          <th>Partenaire</th>
+          <th>Client type</th>
+          <th>Nom client</th>
+          <th>Plaque</th>
+          <th>Véhicule</th>
+          <th>Intervention</th>
+          <th>Encodé par</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in fiches %}
+        <tr>
+          <td style="color:var(--text2);font-size:0.8rem;">#{{ f.id }}</td>
+          <td style="white-space:nowrap;">
+            <strong>{{ f.date_encodage.strftime('%d/%m/%Y') }}</strong><br>
+            <span style="color:var(--text2);font-size:0.8rem;">{{ f.date_encodage.strftime('%H:%M') }}</span>
+          </td>
+          <td><span class="badge-pill active">{{ f.partenaire.nom }}</span></td>
+          <td>{{ f.type_client.nom }}</td>
+          <td><strong>{{ f.nom_client }}</strong></td>
+          <td><code style="background:var(--bg3);padding:0.2rem 0.5rem;border-radius:4px;font-size:0.85rem;">{{ f.plaque }}</code></td>
+          <td>{{ f.type_vehicule.nom }}</td>
+          <td>{{ f.type_intervention.nom }}</td>
+          <td style="color:var(--text2);">{{ f.auteur.username }}</td>
+          <td>
+            <a href="{{ url_for('detail_fiche', fiche_id=f.id) }}" class="btn btn-secondary btn-sm">Voir</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:3rem;color:var(--text2);">
+    <div style="font-size:3rem;margin-bottom:1rem;">📭</div>
+    <p>Aucune fiche enregistrée pour le moment.</p>
+    <a href="{{ url_for('nouvelle_fiche') }}" class="btn btn-primary" style="margin-top:1rem;">Créer la première fiche</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
