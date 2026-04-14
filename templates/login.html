@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoTrack — Connexion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0f14; --bg2: #141720; --bg3: #1c2030; --border: #2a2f42;
+      --accent: #f0a500; --text: #e8eaf0; --text2: #8b90a8;
+      --danger: #ef4444; --radius: 8px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Barlow', sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+      background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(240,165,0,0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(224,92,26,0.06) 0%, transparent 40%);
+    }
+    .login-box {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 2.5rem 2rem; width: 100%; max-width: 400px;
+      box-shadow: 0 8px 48px rgba(0,0,0,0.6);
+    }
+    .logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2.5rem; font-weight: 700; color: var(--accent);
+      letter-spacing: 4px; text-align: center; margin-bottom: 0.25rem;
+    }
+    .logo span { color: var(--text2); font-weight: 400; }
+    .subtitle { text-align: center; color: var(--text2); font-size: 0.85rem; margin-bottom: 2rem; }
+    .form-group { margin-bottom: 1.25rem; }
+    label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text2); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    input {
+      width: 100%; background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text); border-radius: var(--radius); padding: 0.7rem 1rem;
+      font-family: 'Barlow', sans-serif; font-size: 1rem; transition: border-color 0.2s;
+    }
+    input:focus { outline: none; border-color: var(--accent); }
+    input::placeholder { color: var(--text2); }
+    .btn-login {
+      width: 100%; background: var(--accent); color: #000;
+      border: none; border-radius: var(--radius); padding: 0.8rem;
+      font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 700;
+      letter-spacing: 1px; cursor: pointer; transition: background 0.2s; margin-top: 0.5rem;
+    }
+    .btn-login:hover { background: #ffc02e; }
+    .alert {
+      padding: 0.65rem 0.9rem; border-radius: var(--radius); margin-bottom: 1rem;
+      font-size: 0.85rem; background: #2d0b0b; border-left: 3px solid var(--danger); color: #fca5a5;
+    }
+    .divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+    .hint { font-size: 0.75rem; color: var(--text2); text-align: center; }
+    .car-icon { text-align: center; font-size: 2.5rem; margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+<div class="login-box">
+  <div class="car-icon">🔧</div>
+  <div class="logo">AUTO<span>TRACK</span></div>
+  <div class="subtitle">Gestion d'interventions automobiles</div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in messages %}
+  <div class="alert">{{ msg }}</div>
+  {% endfor %}
+  {% endwith %}
+
+  <form method="POST">
+    <div class="form-group">
+      <label>Identifiant</label>
+      <input type="text" name="username" placeholder="Votre identifiant" required autofocus>
+    </div>
+    <div class="form-group">
+      <label>Mot de passe</label>
+      <input type="password" name="password" placeholder="••••••••" required>
+    </div>
+    <button type="submit" class="btn-login">SE CONNECTER →</button>
+  </form>
+</div>
+</body>
+</html>

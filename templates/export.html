@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Export — AutoTrack{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>📤 Exporter les données</h1>
+  <p>Sélectionnez vos filtres puis téléchargez en Excel ou CSV</p>
+</div>
+
+<div class="grid-2" style="gap:1.5rem;align-items:start;">
+  <div class="card">
+    <div class="card-header">🔧 Filtres d'export</div>
+    <form method="POST">
+      <div class="form-group">
+        <label>Partenaire</label>
+        <select name="partenaire_id">
+          <option value="">— Tous les partenaires —</option>
+          {% for p in partenaires %}
+          <option value="{{ p.id }}">{{ p.nom }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Type de client</label>
+        <select name="type_client_id">
+          <option value="">— Tous les types client —</option>
+          {% for tc in types_client %}
+          <option value="{{ tc.id }}">{{ tc.nom }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Date début</label>
+          <input type="date" name="date_debut">
+        </div>
+        <div class="form-group">
+          <label>Date fin</label>
+          <input type="date" name="date_fin">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Format d'export</label>
+        <div style="display:flex;gap:1rem;margin-top:0.25rem;">
+          <label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;font-size:0.95rem;color:var(--text);cursor:pointer;">
+            <input type="radio" name="format" value="xlsx" checked style="width:auto;"> Excel (.xlsx)
+          </label>
+          <label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;font-size:0.95rem;color:var(--text);cursor:pointer;">
+            <input type="radio" name="format" value="csv" style="width:auto;"> CSV
+          </label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%;">📥 Télécharger l'export</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-header">ℹ️ Colonnes exportées</div>
+    <ul style="list-style:none;display:flex;flex-direction:column;gap:0.5rem;">
+      {% for col in ['ID', 'Date', 'Heure', 'Partenaire', 'Type Client', 'Nom Client', 'Plaque', 'Type Véhicule', 'Type Intervention', 'Commentaire', 'Encodé par'] %}
+      <li style="display:flex;align-items:center;gap:0.75rem;padding:0.4rem 0;border-bottom:1px solid var(--border);">
+        <span style="color:var(--success);">✓</span>
+        <span>{{ col }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    <div style="margin-top:1.25rem;padding:0.75rem;background:var(--bg3);border-radius:var(--radius);font-size:0.8rem;color:var(--text2);">
+      💡 <strong>Tip :</strong> Le format Excel (.xlsx) inclut une mise en forme avec les en-têtes colorés.
+      Le CSV est idéal pour importer dans d'autres outils.
+    </div>
+  </div>
+</div>
+{% endblock %}

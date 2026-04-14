@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Fiche #{{ fiche.id }} — AutoTrack{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+    <div>
+      <h1>📄 Fiche #{{ fiche.id }}</h1>
+      <p>Encodée le {{ fiche.date_encodage.strftime('%d/%m/%Y à %H:%M') }} par <strong>{{ fiche.auteur.username }}</strong></p>
+    </div>
+    <div style="display:flex;gap:0.75rem;">
+      <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">← Retour</a>
+      {% if current_user.is_admin %}
+      <form method="POST" action="{{ url_for('supprimer_fiche', fiche_id=fiche.id) }}"
+            onsubmit="return confirm('Supprimer cette fiche définitivement ?');">
+        <button type="submit" class="btn btn-danger">🗑 Supprimer</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="grid-2" style="gap:1.5rem;">
+  <div>
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-header">🔍 Informations générales</div>
+      <table style="width:100%;">
+        <tr><td style="color:var(--text2);padding:0.5rem 0;width:40%;">Partenaire</td>
+            <td><span class="badge-pill active">{{ fiche.partenaire.nom }}</span></td></tr>
+        <tr><td style="color:var(--text2);padding:0.5rem 0;">Type client</td>
+            <td><strong>{{ fiche.type_client.nom }}</strong></td></tr>
+        <tr><td style="color:var(--text2);padding:0.5rem 0;">Nom client</td>
+            <td><strong>{{ fiche.nom_client }}</strong></td></tr>
+        <tr><td style="color:var(--text2);padding:0.5rem 0;">Plaque</td>
+            <td><code style="background:var(--bg3);padding:0.2rem 0.6rem;border-radius:4px;font-size:0.95rem;">{{ fiche.plaque }}</code></td></tr>
+        <tr><td style="color:var(--text2);padding:0.5rem 0;">Type véhicule</td>
+            <td>{{ fiche.type_vehicule.nom }}</td></tr>
+        <tr><td style="color:var(--text2);padding:0.5rem 0;">Intervention</td>
+            <td>{{ fiche.type_intervention.nom }}</td></tr>
+        <tr><td style="color:var(--text2);padding:0.5rem 0;">Date</td>
+            <td>{{ fiche.date_encodage.strftime('%d/%m/%Y à %H:%M') }}</td></tr>
+        <tr><td style="color:var(--text2);padding:0.5rem 0;">Encodé par</td>
+            <td>{{ fiche.auteur.username }}</td></tr>
+      </table>
+    </div>
+
+    {% if fiche.commentaire %}
+    <div class="card">
+      <div class="card-header">💬 Commentaire</div>
+      <p style="line-height:1.6;">{{ fiche.commentaire }}</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <div>
+    {% if fiche.photo_filename %}
+    <div class="card">
+      <div class="card-header">📷 Photo</div>
+      <img src="{{ url_for('static', filename='uploads/' + fiche.photo_filename) }}"
+           alt="Photo du véhicule"
+           style="width:100%;border-radius:var(--radius);border:1px solid var(--border);">
+    </div>
+    {% else %}
+    <div class="card" style="text-align:center;padding:3rem;color:var(--text2);">
+      <div style="font-size:3rem;margin-bottom:1rem;">📷</div>
+      <p>Aucune photo enregistrée</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
