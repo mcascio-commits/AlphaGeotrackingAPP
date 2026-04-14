@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% block title %}Nouvelle fiche — AutoTrack{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>📝 Nouvelle fiche d'intervention</h1>
+  <p>Suivez les étapes pour encoder une intervention</p>
+</div>
+
+<!-- Steps indicator -->
+<div class="steps" id="steps">
+  <div class="step active" id="step-ind-1">1 · Partenaire</div>
+  <div class="step" id="step-ind-2">2 · Type client</div>
+  <div class="step" id="step-ind-3">3 · Véhicule</div>
+  <div class="step" id="step-ind-4">4 · Détails</div>
+</div>
+
+<form method="POST" enctype="multipart/form-data" id="ficheForm">
+
+  <!-- ÉTAPE 1 : Partenaire -->
+  <div class="card step-panel" id="panel-1">
+    <div class="card-header">🤝 Étape 1 — Choisir le partenaire</div>
+    <p style="color:var(--text2);margin-bottom:1.5rem;font-size:0.9rem;">Sélectionnez le partenaire concerné par cette intervention.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;margin-bottom:1.5rem;">
+      {% for p in partenaires %}
+      <label class="choice-card" for="part_{{ p.id }}">
+        <input type="radio" name="partenaire_id" id="part_{{ p.id }}" value="{{ p.id }}" style="display:none;" required>
+        <div class="choice-body">
+          <span class="choice-icon">🤝</span>
+          <span class="choice-label">{{ p.nom }}</span>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+    <button type="button" class="btn btn-primary" onclick="nextStep(1)">Suivant →</button>
+  </div>
+
+  <!-- ÉTAPE 2 : Type client -->
+  <div class="card step-panel" id="panel-2" style="display:none;">
+    <div class="card-header">👤 Étape 2 — Type de client</div>
+    <p style="color:var(--text2);margin-bottom:1.5rem;font-size:0.9rem;">Sélectionnez le type de client.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;margin-bottom:1.5rem;">
+      {% for tc in types_client %}
+      <label class="choice-card" for="tc_{{ tc.id }}">
+        <input type="radio" name="type_client_id" id="tc_{{ tc.id }}" value="{{ tc.id }}" style="display:none;" required>
+        <div class="choice-body">
+          <span class="choice-icon">👤</span>
+          <span class="choice-label">{{ tc.nom }}</span>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+    <div style="display:flex;gap:0.75rem;">
+      <button type="button" class="btn btn-secondary" onclick="prevStep(2)">← Retour</button>
+      <button type="button" class="btn btn-primary" onclick="nextStep(2)">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 3 : Type véhicule -->
+  <div class="card step-panel" id="panel-3" style="display:none;">
+    <div class="card-header">🚗 Étape 3 — Type de véhicule</div>
+    <p style="color:var(--text2);margin-bottom:1.5rem;font-size:0.9rem;">Sélectionnez le type de véhicule.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1rem;margin-bottom:1.5rem;">
+      {% for tv in types_vehicule %}
+      <label class="choice-card" for="tv_{{ tv.id }}">
+        <input type="radio" name="type_vehicule_id" id="tv_{{ tv.id }}" value="{{ tv.id }}" style="display:none;" required>
+        <div class="choice-body">
+          <span class="choice-icon">
+            {% if 'moto' in tv.nom|lower %}🏍️
+            {% elif 'camion' in tv.nom|lower %}🚛
+            {% elif 'camionn' in tv.nom|lower %}🚐
+            {% else %}🚗{% endif %}
+          </span>
+          <span class="choice-label">{{ tv.nom }}</span>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+    <div style="display:flex;gap:0.75rem;">
+      <button type="button" class="btn btn-secondary" onclick="prevStep(3)">← Retour</button>
+      <button type="button" class="btn btn-primary" onclick="nextStep(3)">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 4 : Détails -->
+  <div class="card step-panel" id="panel-4" style="display:none;">
+    <div class="card-header">🔧 Étape 4 — Détails de l'intervention</div>
+
+    <div class="grid-2">
+      <div class="form-group">
+        <label>Nom du client *</label>
+        <input type="text" name="nom_client" placeholder="Ex: Dupont Jean" required>
+      </div>
+      <div class="form-group">
+        <label>Plaque d'immatriculation *</label>
+        <input type="text" name="plaque" placeholder="Ex: 1-ABC-234" required style="text-transform:uppercase;">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Type d'intervention *</label>
+      <select name="type_intervention_id" id="interventionSelect" required>
+        <option value="">— Chargement... —</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Photo du véhicule</label>
+      <input type="file" name="photo" accept="image/*" capture="environment" onchange="previewPhoto(this)">
+      <img id="photo-preview" src="" alt="Aperçu">
+      <small style="color:var(--text2);">Optionnel — JPG, PNG, max 16 Mo</small>
+    </div>
+
+    <div class="form-group">
+      <label>Commentaire</label>
+      <textarea name="commentaire" placeholder="Informations complémentaires..."></textarea>
+    </div>
+
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:0.75rem 1rem;margin-bottom:1.5rem;font-size:0.85rem;color:var(--text2);">
+      📅 Date et heure d'encodage : <strong style="color:var(--text);" id="datetime-display">—</strong>
+      &nbsp;|&nbsp; 👤 Encodé par : <strong style="color:var(--text);">{{ current_user.username }}</strong>
+    </div>
+
+    <div style="display:flex;gap:0.75rem;">
+      <button type="button" class="btn btn-secondary" onclick="prevStep(4)">← Retour</button>
+      <button type="submit" class="btn btn-success">✅ Enregistrer la fiche</button>
+    </div>
+  </div>
+</form>
+
+<style>
+.choice-card { cursor: pointer; display: block; }
+.choice-body {
+  border: 2px solid var(--border); border-radius: var(--radius);
+  padding: 1.25rem 1rem; text-align: center; transition: all 0.2s;
+  background: var(--bg3); display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+}
+.choice-body:hover { border-color: var(--accent); background: rgba(240,165,0,0.05); }
+.choice-icon { font-size: 1.8rem; }
+.choice-label { font-weight: 600; font-size: 0.95rem; }
+input[type=radio]:checked + .choice-body {
+  border-color: var(--accent); background: rgba(240,165,0,0.1);
+  box-shadow: 0 0 0 3px rgba(240,165,0,0.2);
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentStep = 1;
+const totalSteps = 4;
+
+function updateStepIndicators(step) {
+  for (let i = 1; i <= totalSteps; i++) {
+    const ind = document.getElementById(`step-ind-${i}`);
+    ind.classList.remove('active', 'done');
+    if (i < step) ind.classList.add('done');
+    else if (i === step) ind.classList.add('active');
+  }
+}
+
+function nextStep(from) {
+  // Validate current step
+  if (from === 1) {
+    if (!document.querySelector('input[name="partenaire_id"]:checked')) {
+      alert('Veuillez sélectionner un partenaire.'); return;
+    }
+  }
+  if (from === 2) {
+    if (!document.querySelector('input[name="type_client_id"]:checked')) {
+      alert('Veuillez sélectionner un type de client.'); return;
+    }
+    // Load interventions for selected type_client
+    const tcId = document.querySelector('input[name="type_client_id"]:checked').value;
+    loadInterventions(tcId);
+  }
+  if (from === 3) {
+    if (!document.querySelector('input[name="type_vehicule_id"]:checked')) {
+      alert('Veuillez sélectionner un type de véhicule.'); return;
+    }
+  }
+  document.getElementById(`panel-${from}`).style.display = 'none';
+  document.getElementById(`panel-${from + 1}`).style.display = 'block';
+  currentStep = from + 1;
+  updateStepIndicators(currentStep);
+  window.scrollTo(0, 0);
+}
+
+function prevStep(from) {
+  document.getElementById(`panel-${from}`).style.display = 'none';
+  document.getElementById(`panel-${from - 1}`).style.display = 'block';
+  currentStep = from - 1;
+  updateStepIndicators(currentStep);
+  window.scrollTo(0, 0);
+}
+
+function loadInterventions(typeClientId) {
+  const sel = document.getElementById('interventionSelect');
+  sel.innerHTML = '<option value="">Chargement...</option>';
+  fetch(`/api/interventions/${typeClientId}`)
+    .then(r => r.json())
+    .then(data => {
+      sel.innerHTML = '<option value="">— Sélectionner —</option>';
+      data.forEach(i => {
+        sel.innerHTML += `<option value="${i.id}">${i.nom}</option>`;
+      });
+    })
+    .catch(() => { sel.innerHTML = '<option value="">Erreur de chargement</option>'; });
+}
+
+function previewPhoto(input) {
+  const preview = document.getElementById('photo-preview');
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => { preview.src = e.target.result; preview.style.display = 'block'; };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+// Live clock
+function updateClock() {
+  const now = new Date();
+  const fmt = now.toLocaleDateString('fr-BE', { day:'2-digit', month:'2-digit', year:'numeric' })
+    + ' à ' + now.toLocaleTimeString('fr-BE', { hour:'2-digit', minute:'2-digit' });
+  const el = document.getElementById('datetime-display');
+  if (el) el.textContent = fmt;
+}
+updateClock();
+setInterval(updateClock, 1000);
+</script>
+{% endblock %}
